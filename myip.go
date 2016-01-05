@@ -11,6 +11,11 @@ import (
 	"os"
 )
 
+// GitInfo is either the empty string (the default)
+// or is set to the git hash of the most recent commit
+// using the -X linker flag (Example: "2015-01-11-284c030+")
+var GitInfo string
+
 // useIPv4 contains a flag inidicating whether IPv4 addresses should be used (default: false)
 var useIPv4 bool
 
@@ -22,6 +27,8 @@ func init() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "%s returns your local IPv6 (or IPv4) address.\n", executableName)
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "Version: %s\n", version())
 		fmt.Fprintf(os.Stderr, "\n")
 		fmt.Fprintf(os.Stderr, "Usage:\n")
 		fmt.Fprintf(os.Stderr, "\n")
@@ -117,4 +124,14 @@ func getIP(address net.Addr) net.IP {
 	}
 
 	return ip
+}
+
+// version returns the git version of this binary (e.g. "2015-01-11-284c030+").
+// If the linker flags were not provided, the return value is "unknown".
+func version() string {
+	if GitInfo != "" {
+		return GitInfo
+	}
+
+	return "unknown"
 }

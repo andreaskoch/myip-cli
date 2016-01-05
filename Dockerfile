@@ -6,4 +6,4 @@ ADD . /go/src/github.com/andreaskoch/myip
 WORKDIR /go/src/github.com/andreaskoch/myip
 
 # Build
-RUN make install && make clean
+RUN make crosscompile && make clean

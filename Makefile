@@ -1,6 +1,8 @@
 install:
-	go get github.com/mitchellh/gox
-	gox -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
+	go run make.go -install
+
+crosscompile:
+	go run make.go -crosscompile
 
 clean:
 	rm -rf pkg src
