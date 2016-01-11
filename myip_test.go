@@ -86,8 +86,8 @@ func Test_getMyIP_UseIPv4False_IPProviderHasIPv6Addresses_IPv46AddressesAreRetur
 
 }
 
-// getMyIP should not return anything if the IP provider has no IPv6 addresses.
-func Test_getMyIP_UseIPv4False_IPProviderHasNoIPv6Addresses_ResultIsEmpty(t *testing.T) {
+// getMyIP should not return IPs if the IP provider has no IPv6 addresses. Also getMyIP should return an error.
+func Test_getMyIP_UseIPv4False_IPProviderHasNoIPv6Addresses_ResultIsEmpty_ErrorIsReturned(t *testing.T) {
 	// arrange
 	ipProvider := testIPProvider{
 		ipv4IPs: []net.IP{
@@ -99,7 +99,7 @@ func Test_getMyIP_UseIPv4False_IPProviderHasNoIPv6Addresses_ResultIsEmpty(t *tes
 	useIPv4 := false
 
 	// act
-	ips, _ := getMyIP(ipProvider, selectionOption, useIPv4)
+	ips, err := getMyIP(ipProvider, selectionOption, useIPv4)
 
 	// assert
 	if len(ips) > 0 {
@@ -107,6 +107,10 @@ func Test_getMyIP_UseIPv4False_IPProviderHasNoIPv6Addresses_ResultIsEmpty(t *tes
 		t.Logf("getMyIP(ipProvider, %q, %v) returned %q but should not have returned anything because the IP provider has no IPv6 addresses", selectionOption, useIPv4, ips)
 	}
 
+	if err == nil {
+		t.Fail()
+		t.Logf("getMyIP(ipProvider, %q, %v) should return an error if the IP provider has no IPv6 addresses", selectionOption, useIPv4)
+	}
 }
 
 // getMyIP (useIPv4 = false) should only return an error if the IP provider returns an error.
@@ -195,7 +199,7 @@ func Test_getSelectedIPs_NoIPsSupplied_NoSelectOptionSupplied_ResultIsEmpty_NoEr
 }
 
 // If no IPs are supplied but a select option is given an error should be returned.
-func Test_getSelectedIPs_NoIPsSupplied_SelectOptionSupplied_ErrorIsReturned(t *testing.T) {
+func Test_getSelectedIPs_NoIPsSupplied_SelectOptionAllSupplied_NoErrorIsReturned(t *testing.T) {
 	// arrange
 	ips := []net.IP{}
 	selectOption := "all"
@@ -204,9 +208,32 @@ func Test_getSelectedIPs_NoIPsSupplied_SelectOptionSupplied_ErrorIsReturned(t *t
 	_, err := getSelectedIPs(ips, selectOption)
 
 	// assert
-	if err == nil {
+	if err != nil {
 		t.Fail()
-		t.Errorf("getSelectedIPs(%q, %q) should return an error.", ips, selectOption)
+		t.Errorf("getSelectedIPs(%q, %q) should not return an error even if no IPs are supplied.", ips, selectOption)
+	}
+}
+
+// If no IPs are supplied but a select option (other than "all") is given an error should be returned.
+func Test_getSelectedIPs_NoIPsSupplied_SelectOptionupplied_ErrorIsReturned(t *testing.T) {
+	// arrange
+	selectOptions := []string{
+		"first",
+		"last",
+		"1",
+		"1,2,3",
+	}
+	for _, selectOption := range selectOptions {
+		ips := []net.IP{}
+
+		// act
+		_, err := getSelectedIPs(ips, selectOption)
+
+		// assert
+		if err == nil {
+			t.Fail()
+			t.Errorf("getSelectedIPs(%q, %q) should return an error.", ips, selectOption)
+		}
 	}
 }
 
