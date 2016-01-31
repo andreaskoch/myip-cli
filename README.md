@@ -91,14 +91,14 @@ myip remote -6
 If you have [go](https://golang.org/) installed:
 
 ```bash
-git clone git@github.com:andreaskoch/myip.git && cd myip
+git clone git@github.com:andreaskoch/myip-cli.git && cd myip-cli
 go run make.go -install
 ```
 
 or
 
 ```bash
-go get github.com/andreaskoch/myip
+go get github.com/andreaskoch/myip-cli
 ```
 
 ## Build
@@ -112,19 +112,19 @@ go run make.go -crosscompile
 If you don't have golang installed but have [docker](https://www.docker.com/) instead you can use docker to build/cross-compile _myip_:
 
 ```bash
-git clone git@github.com:andreaskoch/myip.git && cd myip
+git clone git@github.com:andreaskoch/myip-cli.git && cd myip-cli
 docker run \
        --rm \
-       -v `pwd`:/go/src/github.com/andreaskoch/myip \
-       --workdir=/go/src/github.com/andreaskoch/myip \
+       -v `pwd`:/go/src/github.com/andreaskoch/myip-cli \
+       --workdir=/go/src/github.com/andreaskoch/myip-cli \
        golang:latest \
        make crosscompile
 ```
 
-Or you can extract the binaries from the automatically built [andreaskoch/myip](https://hub.docker.com/r/andreaskoch/allmark/) docker image:
+Or you can extract the binaries from the automatically built [andreaskoch/myip-cli](https://hub.docker.com/r/andreaskoch/myip-cli/) docker image:
 
 ```bash
-docker run --rm -v `pwd`:/exchange andreaskoch/myip:latest bash -c "cp -a /go/src/github.com/andreaskoch/myip/bin/* /exchange"
+docker run --rm -v `pwd`:/exchange andreaskoch/myip-cli:latest bash -c "cp -a /go/src/github.com/andreaskoch/myip-cli/bin/* /exchange"
 ```
 
 ↑ This command will copy the binaries from the docker container to your current directory.

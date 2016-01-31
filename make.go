@@ -40,6 +40,9 @@ const GOOS_ENVIRONMENT_VARIBALE = "GOOS"
 // GOARCH environment variable name
 const GOARCH_ENVIRONMENT_VARIBALE = "GOARCH"
 
+// GO15VENDOREXPERIMENT environment variable name
+const GO15VENDOREXPERIMENT_ENVIRONMENT_VARIBALE = "GO15VENDOREXPERIMENT"
+
 var (
 
 	// command line flags
@@ -47,6 +50,7 @@ var (
 	installFlagIsSet      = flag.Bool("install", false, fmt.Sprintf("Compiles the %s binaries", ProjectName))
 	crossCompileFlagIsSet = flag.Bool("crosscompile", false, fmt.Sprintf("Compile %s binaries for all platforms and architectures", ProjectName))
 	versionFlagIsSet      = flag.Bool("version", false, "Get the current version number of the repository")
+	coverageFlagIsSet     = flag.Bool("coverage", false, "Run the test and create a code coverage report")
 
 	// The GOPATH for the current project
 	goPath = getWorkingDirectory()
@@ -57,23 +61,11 @@ var (
 	// A list of all supported compilation targets (e.g. "windows/amd64")
 	compilationTargets = []compilationTarget{
 		compilationTarget{"darwin", "amd64", []string{}},
-		compilationTarget{"dragonfly", "amd64", []string{}},
-		compilationTarget{"freebsd", "amd64", []string{}},
-		compilationTarget{"freebsd", "arm", []string{}},
-		compilationTarget{"freebsd", "arm", []string{"GOARM=5"}},
-		compilationTarget{"freebsd", "arm", []string{"GOARM=6"}},
-		compilationTarget{"freebsd", "arm", []string{"GOARM=7"}},
 		compilationTarget{"linux", "amd64", []string{}},
 		compilationTarget{"linux", "arm", []string{}},
 		compilationTarget{"linux", "arm", []string{"GOARM=5"}},
 		compilationTarget{"linux", "arm", []string{"GOARM=6"}},
 		compilationTarget{"linux", "arm", []string{"GOARM=7"}},
-		compilationTarget{"netbsd", "amd64", []string{}},
-		compilationTarget{"netbsd", "arm", []string{"GOARM=5"}},
-		compilationTarget{"netbsd", "arm", []string{"GOARM=6"}},
-		compilationTarget{"netbsd", "arm", []string{"GOARM=7"}},
-		compilationTarget{"openbsd", "amd64", []string{}},
-		compilationTarget{"solaris", "amd64", []string{}},
 		compilationTarget{"windows", "amd64", []string{}},
 	}
 
@@ -149,6 +141,15 @@ func main() {
 		return
 	}
 
+	if *coverageFlagIsSet {
+		if err := codecoverage(); err != nil {
+			fmt.Fprintf(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+
+		return
+	}
+
 	flag.Usage()
 }
 
@@ -157,11 +158,32 @@ func install() error {
 
 	// prepare the environment variables
 	environmentVariables := cleanGoEnv()
-	environmentVariables = setEnv(environmentVariables, GOPATH_ENVIRONMENT_VARIABLE, goPath)
 	environmentVariables = setEnv(environmentVariables, GOBIN_ENVIRONMENT_VARIBALE, goBin)
+	environmentVariables = setEnv(environmentVariables, GO15VENDOREXPERIMENT_ENVIRONMENT_VARIBALE, "1")
 
 	return runCommand(os.Stdout, os.Stderr, goPath, environmentVariables, "go", "install", getBuildVersionFlag())
 
+}
+
+// codecoverage runs all tests and creates a code coverage report
+func codecoverage() error {
+
+	// prepare the environment variables
+	environmentVariables := cleanGoEnv()
+	environmentVariables = setEnv(environmentVariables, GOBIN_ENVIRONMENT_VARIBALE, goBin)
+	environmentVariables = setEnv(environmentVariables, GO15VENDOREXPERIMENT_ENVIRONMENT_VARIBALE, "1")
+
+	coverageError := runCommand(os.Stdout, os.Stderr, goPath, environmentVariables, "go", "test", "-coverprofile=coverage.out")
+	if coverageError != nil {
+		return coverageError
+	}
+
+	reportError := runCommand(os.Stdout, os.Stderr, goPath, environmentVariables, "go", "tool", "cover", "-html=coverage.out", "-o", "coverage.html")
+	if reportError != nil {
+		return reportError
+	}
+
+	return nil
 }
 
 // Cross-compile all parts of allmark for all supported platforms.
@@ -169,8 +191,8 @@ func crossCompile() error {
 
 	// prepare the environment variables
 	environmentVariables := cleanGoEnv()
-	environmentVariables = setEnv(environmentVariables, GOPATH_ENVIRONMENT_VARIABLE, goPath)
-	// environmentVariables = setEnv(environmentVariables, GOBIN_ENVIRONMENT_VARIBALE, goBin)
+	environmentVariables = setEnv(environmentVariables, GOBIN_ENVIRONMENT_VARIBALE, goBin)
+	environmentVariables = setEnv(environmentVariables, GO15VENDOREXPERIMENT_ENVIRONMENT_VARIBALE, "1")
 
 	// iterate over all supported compilation targets
 	for _, target := range compilationTargets {
@@ -273,7 +295,7 @@ func runCommand(stdout, stderr io.Writer, workingDirectory string, environmentVa
 // cleanGoEnv returns a copy of the current environment with GOPATH_ENVIRONMENT_VARIABLE and GOBIN_ENVIRONMENT_VARIBALE removed.
 func cleanGoEnv() (clean []string) {
 	for _, env := range os.Environ() {
-		if strings.HasPrefix(env, GOPATH_ENVIRONMENT_VARIABLE+"=") || strings.HasPrefix(env, GOBIN_ENVIRONMENT_VARIBALE+"=") {
+		if strings.HasPrefix(env, GOBIN_ENVIRONMENT_VARIBALE+"=") {
 			continue
 		}
 

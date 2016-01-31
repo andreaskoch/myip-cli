@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/andreaskoch/myip"
 	"net"
 	"os"
 	"regexp"
@@ -136,7 +137,7 @@ func main() {
 // myLocalIP returns the current local IPv6 (or IPv4) address
 func myLocalIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 
-	ipProvider, ipProviderError := newLocalIPProvider()
+	ipProvider, ipProviderError := myip.NewLocalIPProvider()
 	if ipProviderError != nil {
 		return nil, fmt.Errorf("%s\n", ipProviderError.Error())
 	}
@@ -147,7 +148,7 @@ func myLocalIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 // myRemoteIP returns the current remote IPv6 (or IPv4) address
 func myRemoteIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 
-	ipProvider, ipProviderError := newRemoteIPProvider()
+	ipProvider, ipProviderError := myip.NewRemoteIPProvider()
 	if ipProviderError != nil {
 		return nil, fmt.Errorf("%s\n", ipProviderError.Error())
 	}
@@ -167,8 +168,19 @@ func getMyIP(ipProvider ipAddresser, selectionOption string, useIPv4 bool) ([]ne
 		allIPs, ipErr = ipProvider.GetIPv6Addresses()
 	}
 
+	// handle errors
 	if ipErr != nil {
 		return nil, fmt.Errorf("%s\n", ipErr.Error())
+	}
+
+	// abort if no IPs are returned
+	if len(allIPs) == 0 {
+		ipType := "IPv6"
+		if useIPv4 {
+			ipType = "IPv4"
+		}
+
+		return []net.IP{}, fmt.Errorf("No %s IPs available.", ipType)
 	}
 
 	// select one or more IPs
@@ -188,7 +200,9 @@ func getSelectedIPs(ips []net.IP, selectionOption string) ([]net.IP, error) {
 	if len(ips) == 0 {
 
 		// If there was a selection given, an empty IP slice is an error
-		if selectionGiven := len(selectionOption) > 0; selectionGiven {
+		selectionGiven := len(selectionOption) > 0
+		selectOptionIsNotAll := selectionOption != ipSelectionOptionAll
+		if selectionGiven && selectOptionIsNotAll {
 			return []net.IP{}, fmt.Errorf("Invalid selection %q. No IPs available.", selectionOption)
 		}
 
