@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/andreaskoch/myip/local.go (5.3%)</option>
+				
+				<option value="file1">github.com/andreaskoch/myip/remote.go (71.4%)</option>
+				
+				<option value="file2">github.com/andreaskoch/myip/util.go (28.6%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" >// Copyright 2016 Andreas Koch. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package myip
+
+import (
+        "net"
+)
+
+// newLocalIPProvider creates a new instance of the
+// localIPProvider type.
+func newLocalIPProvider() (localIPProvider, error) <span class="cov0" title="0">{
+        addressProvider, err := newInterfaceAddressProvider()
+        if err != nil </span><span class="cov0" title="0">{
+                return localIPProvider{}, err
+        }</span>
+
+        <span class="cov0" title="0">return localIPProvider{addressProvider}, nil</span>
+}
+
+// localIPProvider provides access to local
+// IP addresses.
+type localIPProvider struct {
+        addressProvider interfaceAddressProvider
+}
+
+// GetIPv6Address returns the first local IPv6 address
+func (p localIPProvider) GetIPv6Addresses() ([]net.IP, error) <span class="cov0" title="0">{
+
+        // get the available IPs from the address provider
+        allIPs, err := p.addressProvider.GetIPs()
+        if err != nil </span><span class="cov0" title="0">{
+                return []net.IP{}, err
+        }</span>
+
+        <span class="cov0" title="0">var filteredIPs []net.IP
+        for _, ip := range allIPs </span><span class="cov0" title="0">{
+
+                // ignore loopback IPs
+                if isLoopbackIP(ip) </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // ignore all non-IPv6 addresses
+                <span class="cov0" title="0">if !isIPv6(ip) </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">filteredIPs = append(filteredIPs, ip)</span>
+        }
+
+        <span class="cov0" title="0">return filteredIPs, nil</span>
+}
+
+// GetIPv4Address returns the first local IPv4 address
+func (p localIPProvider) GetIPv4Addresses() ([]net.IP, error) <span class="cov0" title="0">{
+
+        // get the available IPs from the address provider
+        allIPs, err := p.addressProvider.GetIPs()
+        if err != nil </span><span class="cov0" title="0">{
+                return []net.IP{}, err
+        }</span>
+
+        <span class="cov0" title="0">var filteredIPs []net.IP
+        for _, ip := range allIPs </span><span class="cov0" title="0">{
+
+                // ignore loopback IPs
+                if isLoopbackIP(ip) </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // ignore all non-IPv4 addresses
+                <span class="cov0" title="0">if !isIPv4(ip) </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">filteredIPs = append(filteredIPs, ip)</span>
+        }
+
+        <span class="cov0" title="0">return filteredIPs, nil</span>
+}
+
+// newInterfaceAddressProvider creates a new instance of the interfaceAddressProvider type
+// with the local interfaces as a data source.
+func newInterfaceAddressProvider() (interfaceAddressProvider, error) <span class="cov0" title="0">{
+
+        interfaces, err := net.Interfaces()
+        if err != nil </span><span class="cov0" title="0">{
+                return interfaceAddressProvider{}, err
+        }</span>
+
+        <span class="cov0" title="0">return interfaceAddressProvider{
+                interfaces: interfaces,
+        }, nil</span>
+}
+
+// interfaceAddressProvider provides functions for accessing the IP addresses of network interfaces.
+type interfaceAddressProvider struct {
+        interfaces []net.Interface
+}
+
+// GetIPs returns all IP addresses of the current machine.
+func (p interfaceAddressProvider) GetIPs() (ips []net.IP, err error) <span class="cov8" title="1">{
+
+        for _, i := range p.interfaces </span><span class="cov0" title="0">{
+                addrs, err := i.Addrs()
+                if err != nil </span><span class="cov0" title="0">{
+                        return ips, err
+                }</span>
+
+                <span class="cov0" title="0">for _, addr := range addrs </span><span class="cov0" title="0">{
+                        ip := getIP(addr)
+                        ips = append(ips, ip)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return ips, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Copyright 2016 Andreas Koch. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package myip
+
+import (
+        "bufio"
+        "crypto/tls"
+        "fmt"
+        "net"
+        "net/http"
+        "strings"
+        "time"
+)
+
+// newRemoteIPProvider creates a new instance of the
+// remoteIPProvider type.
+func newRemoteIPProvider() (remoteIPProvider, error) <span class="cov0" title="0">{
+
+        // remote IPv4 provider
+        ipv4AddressProvider, ipv4ProviderErr := newRemoteAddressProvider("https://ipv4.icanhazip.com")
+        if ipv4ProviderErr != nil </span><span class="cov0" title="0">{
+                return remoteIPProvider{}, ipv4ProviderErr
+        }</span>
+
+        // remote IPv6 provider
+        <span class="cov0" title="0">ipv6AddressProvider, ipv6ProviderErr := newRemoteAddressProvider("https://ipv6.icanhazip.com")
+        if ipv6ProviderErr != nil </span><span class="cov0" title="0">{
+                return remoteIPProvider{}, ipv6ProviderErr
+        }</span>
+
+        <span class="cov0" title="0">return remoteIPProvider{
+                ipv4Provider: ipv4AddressProvider,
+                ipv6Provider: ipv6AddressProvider,
+        }, nil</span>
+}
+
+// remoteIPProvider provides access to remote
+// IP addresses.
+type remoteIPProvider struct {
+        ipv4Provider remoteAddressProvider
+        ipv6Provider remoteAddressProvider
+}
+
+// GetIPv6Address returns the remote IPv6 address
+func (p remoteIPProvider) GetIPv6Addresses() ([]net.IP, error) <span class="cov8" title="1">{
+        ip, err := p.ipv6Provider.GetRemoteIPAddress()
+        if err != nil </span><span class="cov0" title="0">{
+                return []net.IP{}, err
+        }</span>
+
+        <span class="cov8" title="1">if !isIPv6(ip) </span><span class="cov8" title="1">{
+                return []net.IP{}, fmt.Errorf("The returned IP address (%s) is not an IPv6 address", ip)
+        }</span>
+
+        <span class="cov8" title="1">return []net.IP{ip}, nil</span>
+}
+
+// GetIPv4Address returns the remote IPv4 address
+func (p remoteIPProvider) GetIPv4Addresses() ([]net.IP, error) <span class="cov8" title="1">{
+        ip, err := p.ipv4Provider.GetRemoteIPAddress()
+        if err != nil </span><span class="cov0" title="0">{
+                return []net.IP{}, err
+        }</span>
+
+        <span class="cov8" title="1">if !isIPv4(ip) </span><span class="cov8" title="1">{
+                return []net.IP{}, fmt.Errorf("The returned IP address (%s) is not an IPv4 address", ip)
+        }</span>
+
+        <span class="cov8" title="1">return []net.IP{ip}, nil</span>
+}
+
+// newRemoteAddressProvider creates a new instance of the remoteAddressProvider type
+// with the local interfaces as a data source.
+func newRemoteAddressProvider(providerURL string) (remoteAddressProvider, error) <span class="cov8" title="1">{
+        return remoteAddressProvider{
+                providerURL: providerURL,
+                timeout:     time.Second * 3,
+        }, nil
+}</span>
+
+// remoteAddressProvider provides functions for accessing the IP addresses of network interfaces.
+type remoteAddressProvider struct {
+        providerURL string
+        timeout     time.Duration
+}
+
+// GetRemoteIPAddress returns the IP address returned by the provider with the given URL.
+func (r remoteAddressProvider) GetRemoteIPAddress() (net.IP, error) <span class="cov8" title="1">{
+
+        // create a http client (allow insecure SSL certs)
+        transportConfig := &amp;http.Transport{
+                TLSClientConfig: &amp;tls.Config{InsecureSkipVerify: true},
+        }
+
+        httpClient := &amp;http.Client{
+                Transport: transportConfig,
+                Timeout:   r.timeout,
+        }
+
+        // ask the remote service for the IP
+        resp, err := httpClient.Get(r.providerURL)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        // read the response
+        <span class="cov8" title="1">response := make([]byte, 48)
+        responseReader := bufio.NewReader(resp.Body)
+        bytesRead, readErr := responseReader.Read(response)
+        if readErr != nil || bytesRead == 0 </span><span class="cov0" title="0">{
+                return nil, readErr
+        }</span>
+
+        // prepare the response for parsing
+        <span class="cov8" title="1">content := strings.TrimSpace(string(response[:bytesRead]))
+
+        // parse the response
+        ip := net.ParseIP(content)
+        if ip == nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("%q is not a valid IP address", content)
+        }</span>
+
+        <span class="cov8" title="1">return ip, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Copyright 2016 Andreas Koch. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package myip
+
+import (
+        "net"
+)
+
+// isIPv4 returns true if the given ip address is an IPv4 address.
+func isIPv4(ip net.IP) bool <span class="cov8" title="1">{
+        if ip.To4() != nil </span><span class="cov8" title="1">{
+                return true
+        }</span>
+        <span class="cov8" title="1">return false</span>
+}
+
+// isIPv6 returns true if the given ip address is an IPv6 address.
+func isIPv6(ip net.IP) bool <span class="cov8" title="1">{
+        return isIPv4(ip) == false
+}</span>
+
+// getIP returns the IP of the given address.
+func getIP(address net.Addr) net.IP <span class="cov0" title="0">{
+
+        var ip net.IP
+        switch v := address.(type) </span>{
+        <span class="cov0" title="0">case *net.IPNet:
+                ip = v.IP</span>
+        <span class="cov0" title="0">case *net.IPAddr:
+                ip = v.IP</span>
+        }
+
+        <span class="cov0" title="0">return ip</span>
+}
+
+func isLoopbackIP(ip net.IP) bool <span class="cov0" title="0">{
+
+        // ignore loopback ips
+        if ip.IsLoopback() </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        // ignore local ips
+        <span class="cov0" title="0">if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov0" title="0">return false</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible = document.getElementById('file0');
+		files.addEventListener('change', onChange, false);
+		function onChange() {
+			visible.style.display = 'none';
+			visible = document.getElementById(files.value);
+			visible.style.display = 'block';
+			window.scrollTo(0, 0);
+		}
+	})();
+	</script>
+</html>

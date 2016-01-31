@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/andreaskoch/myip"
 	"net"
 	"os"
 	"regexp"
@@ -136,7 +137,7 @@ func main() {
 // myLocalIP returns the current local IPv6 (or IPv4) address
 func myLocalIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 
-	ipProvider, ipProviderError := newLocalIPProvider()
+	ipProvider, ipProviderError := myip.NewLocalIPProvider()
 	if ipProviderError != nil {
 		return nil, fmt.Errorf("%s\n", ipProviderError.Error())
 	}
@@ -147,7 +148,7 @@ func myLocalIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 // myRemoteIP returns the current remote IPv6 (or IPv4) address
 func myRemoteIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 
-	ipProvider, ipProviderError := newRemoteIPProvider()
+	ipProvider, ipProviderError := myip.NewRemoteIPProvider()
 	if ipProviderError != nil {
 		return nil, fmt.Errorf("%s\n", ipProviderError.Error())
 	}

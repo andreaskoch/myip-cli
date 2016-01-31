@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package myip
 
 import (
 	"bufio"
@@ -14,37 +14,37 @@ import (
 	"time"
 )
 
-// newRemoteIPProvider creates a new instance of the
-// remoteIPProvider type.
-func newRemoteIPProvider() (remoteIPProvider, error) {
+// NewRemoteIPProvider creates a new instance of the
+// RemoteIPProvider type.
+func NewRemoteIPProvider() (RemoteIPProvider, error) {
 
 	// remote IPv4 provider
 	ipv4AddressProvider, ipv4ProviderErr := newRemoteAddressProvider("https://ipv4.icanhazip.com")
 	if ipv4ProviderErr != nil {
-		return remoteIPProvider{}, ipv4ProviderErr
+		return RemoteIPProvider{}, ipv4ProviderErr
 	}
 
 	// remote IPv6 provider
 	ipv6AddressProvider, ipv6ProviderErr := newRemoteAddressProvider("https://ipv6.icanhazip.com")
 	if ipv6ProviderErr != nil {
-		return remoteIPProvider{}, ipv6ProviderErr
+		return RemoteIPProvider{}, ipv6ProviderErr
 	}
 
-	return remoteIPProvider{
+	return RemoteIPProvider{
 		ipv4Provider: ipv4AddressProvider,
 		ipv6Provider: ipv6AddressProvider,
 	}, nil
 }
 
-// remoteIPProvider provides access to remote
+// RemoteIPProvider provides access to remote
 // IP addresses.
-type remoteIPProvider struct {
+type RemoteIPProvider struct {
 	ipv4Provider remoteAddressProvider
 	ipv6Provider remoteAddressProvider
 }
 
-// GetIPv6Address returns the remote IPv6 address
-func (p remoteIPProvider) GetIPv6Addresses() ([]net.IP, error) {
+// GetIPv6Addresses returns the remote IPv6 address.
+func (p RemoteIPProvider) GetIPv6Addresses() ([]net.IP, error) {
 	ip, err := p.ipv6Provider.GetRemoteIPAddress()
 	if err != nil {
 		return []net.IP{}, err
@@ -57,8 +57,8 @@ func (p remoteIPProvider) GetIPv6Addresses() ([]net.IP, error) {
 	return []net.IP{ip}, nil
 }
 
-// GetIPv4Address returns the remote IPv4 address
-func (p remoteIPProvider) GetIPv4Addresses() ([]net.IP, error) {
+// GetIPv4Addresses returns the remote IPv4 address.
+func (p RemoteIPProvider) GetIPv4Addresses() ([]net.IP, error) {
 	ip, err := p.ipv4Provider.GetRemoteIPAddress()
 	if err != nil {
 		return []net.IP{}, err

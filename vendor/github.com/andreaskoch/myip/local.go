@@ -2,34 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package myip
 
 import (
 	"net"
 )
 
-// newLocalIPProvider creates a new instance of the
-// localIPProvider type.
-func newLocalIPProvider() (localIPProvider, error) {
-	addressProvider, err := newInterfaceAddressProvider()
+// NewLocalIPProvider creates a new instance of the
+// LocalIPProvider type.
+func NewLocalIPProvider() (LocalIPProvider, error) {
+	localNetworkAddressProvider, err := newInterfaceIPProvider()
 	if err != nil {
-		return localIPProvider{}, err
+		return LocalIPProvider{}, err
 	}
 
-	return localIPProvider{addressProvider}, nil
+	return LocalIPProvider{localNetworkAddressProvider}, nil
 }
 
-// localIPProvider provides access to local
+// LocalIPProvider provides access to local
 // IP addresses.
-type localIPProvider struct {
-	addressProvider interfaceAddressProvider
+type LocalIPProvider struct {
+	localNetworkAddressProvider IPProvider
 }
 
-// GetIPv6Address returns the first local IPv6 address
-func (p localIPProvider) GetIPv6Addresses() ([]net.IP, error) {
+// GetIPv6Addresses returns all available local IPv6 addresses.
+func (p LocalIPProvider) GetIPv6Addresses() ([]net.IP, error) {
 
 	// get the available IPs from the address provider
-	allIPs, err := p.addressProvider.GetIPs()
+	allIPs, err := p.localNetworkAddressProvider.GetIPs()
 	if err != nil {
 		return []net.IP{}, err
 	}
@@ -53,11 +53,11 @@ func (p localIPProvider) GetIPv6Addresses() ([]net.IP, error) {
 	return filteredIPs, nil
 }
 
-// GetIPv4Address returns the first local IPv4 address
-func (p localIPProvider) GetIPv4Addresses() ([]net.IP, error) {
+// GetIPv4Addresses returns all local IPv4 addresses.
+func (p LocalIPProvider) GetIPv4Addresses() ([]net.IP, error) {
 
 	// get the available IPs from the address provider
-	allIPs, err := p.addressProvider.GetIPs()
+	allIPs, err := p.localNetworkAddressProvider.GetIPs()
 	if err != nil {
 		return []net.IP{}, err
 	}
@@ -81,9 +81,9 @@ func (p localIPProvider) GetIPv4Addresses() ([]net.IP, error) {
 	return filteredIPs, nil
 }
 
-// newInterfaceAddressProvider creates a new instance of the interfaceAddressProvider type
-// with the local interfaces as a data source.
-func newInterfaceAddressProvider() (interfaceAddressProvider, error) {
+// newInterfaceIPProvider creates a new instance of the interfaceAddressProvider type
+// with the local network interfaces as a data source.
+func newInterfaceIPProvider() (interfaceAddressProvider, error) {
 
 	interfaces, err := net.Interfaces()
 	if err != nil {

@@ -1,0 +1,11 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "github.com/andreaskoch/myip",
+			"revision": "342c1147377bda8f35c4374b9111244f2c86a524",
+			"revisionTime": "2016-01-31T21:58:41+01:00"
+		}
+	]
+}
