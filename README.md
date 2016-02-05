@@ -2,7 +2,7 @@
 
 A small tool that returns your current local or remote IP addresses
 
-**myip** is a tiny, cross-platform command-line utility that just **returns your current IP address** (local or remote) for Linux, Windows, Mac, FreeBSD, NetBSD and OpenBSD.
+**myip** is a tiny, cross-platform command-line utility that just **returns your current IP address** (local or remote) for Linux, Windows and Mac.
 
 ## Motivation
 
@@ -103,7 +103,7 @@ go get github.com/andreaskoch/myip-cli
 
 ## Build
 
-You can use to included `make.go`-script to cross-compile _myip_ for darwin, freebsd, linux, netbsd, openbsd and windows (amd64, arm, arm5, arm6, arm7):
+You can use to included `make.go`-script to cross-compile _myip_ for darwin, linux and windows (amd64, arm, arm5, arm6, arm7):
 
 ```bash
 go run make.go -crosscompile
