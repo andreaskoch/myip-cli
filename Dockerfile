@@ -5,5 +5,8 @@ MAINTAINER Andreas Koch <andy@ak7.io>
 ADD . /go/src/github.com/andreaskoch/myip
 WORKDIR /go/src/github.com/andreaskoch/myip
 
+# Run unit tests with code coverage
+RUN make coverage
+
 # Build
-RUN make crosscompile && make clean
+RUN make crosscompile
