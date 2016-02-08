@@ -123,7 +123,7 @@ func main() {
 
 	// print errors
 	if myIPError != nil {
-		fmt.Fprintf(os.Stderr, "%s", myIPError.Error())
+		fmt.Fprintf(os.Stderr, "%s\n", myIPError.Error())
 		os.Exit(1)
 	}
 
