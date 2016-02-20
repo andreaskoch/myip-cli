@@ -10,3 +10,11 @@ RUN make coverage
 
 # Build
 RUN make crosscompile
+
+# Compile
+RUN make install
+
+# Link binary to public folder
+RUN ln -s `pwd`/bin/myip /bin/myip
+
+ENTRYPOINT ["/bin/myip"]
