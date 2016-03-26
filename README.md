@@ -128,3 +128,7 @@ docker run --rm -v `pwd`:/exchange andreaskoch/myip-cli:latest bash -c "cp -a /g
 ```
 
 ↑ This command will copy the binaries from the docker container to your current directory.
+
+## Dependencies
+
+**myip-cli** uses [github.com/andreaskoch/myip](https://github.com/andreaskoch/myip)  for determining your local and remote IP addresses.

@@ -3,9 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "47KnQ7EqZ1bF1q9becLam7t4OGM=",
+			"origin": "github.com/andreaskoch/myip-cli/vendor/github.com/andreaskoch/myip",
 			"path": "github.com/andreaskoch/myip",
-			"revision": "342c1147377bda8f35c4374b9111244f2c86a524",
-			"revisionTime": "2016-01-31T21:58:41+01:00"
+			"revision": "bdb2ba917512d4d7f9d45a5b445562e3194b8fc4",
+			"revisionTime": "2016-03-26T11:10:30+01:00"
 		}
-	]
+	],
+	"rootPath": "github.com/andreaskoch/myip-cli"
 }
