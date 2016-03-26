@@ -123,7 +123,7 @@ func main() {
 
 	// print errors
 	if myIPError != nil {
-		fmt.Fprintf(os.Stderr, "%s", myIPError.Error())
+		fmt.Fprintf(os.Stderr, "%s\n", myIPError.Error())
 		os.Exit(1)
 	}
 
@@ -148,10 +148,7 @@ func myLocalIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 // myRemoteIP returns the current remote IPv6 (or IPv4) address
 func myRemoteIP(selectionOption string, useIPv4 bool) ([]net.IP, error) {
 
-	ipProvider, ipProviderError := myip.NewRemoteIPProvider()
-	if ipProviderError != nil {
-		return nil, fmt.Errorf("%s\n", ipProviderError.Error())
-	}
+	ipProvider := myip.NewRemoteIPProvider()
 
 	return getMyIP(ipProvider, selectionOption, useIPv4)
 }
